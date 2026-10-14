@@ -18,10 +18,14 @@ import type { Cancelled, Init, MeterReading, Result, Settings } from "./protocol
 type V = "1.0.0";
 type Context = ExtensionContext<V>;
 
-/** The 2sl meter (Max for Live) exposes these parameters. */
-const PEAK_PARAM = "Peak Hold";
-const RESET_PARAM = "Reset";
-const RMS_PARAM = "RMS";
+/**
+ * The 2sl meter (Max for Live). Live reports M4L parameters by their *short* name,
+ * so accept both the short and long names.
+ */
+const METER_DEVICE = /2sl[\s_-]*meter/i;
+const PEAK_PARAMS = ["Peak", "Peak Hold"];
+const RMS_PARAMS = ["RMS"];
+const RESET_PARAMS = ["Reset"];
 const SILENT_DB = -69.9;
 
 export function activate(activation: ActivationContext) {
@@ -45,10 +49,10 @@ const isPlainTrack = (t: Track<V>) => t instanceof MidiTrack || t instanceof Aud
 function findMeter(context: Context) {
   const devices = context.application.song.mainTrack.devices;
   for (const [index, d] of devices.entries()) {
-    const peak = d.parameters.find((p) => p.name === PEAK_PARAM);
-    if (peak) {
-      const find = (name: string) => d.parameters.find((p) => p.name === name) ?? null;
-      return { index, peak, rms: find(RMS_PARAM), reset: find(RESET_PARAM) };
+    const find = (names: string[]) => d.parameters.find((p) => names.includes(p.name)) ?? null;
+    const peak = find(PEAK_PARAMS);
+    if (peak && (METER_DEVICE.test(d.name) || find(RMS_PARAMS))) {
+      return { index, peak, rms: find(RMS_PARAMS), reset: find(RESET_PARAMS) };
     }
   }
   return null;
