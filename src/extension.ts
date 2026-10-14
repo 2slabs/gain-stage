@@ -25,7 +25,9 @@ type Context = ExtensionContext<V>;
 const METER_DEVICE = /2sl[\s_-]*meter/i;
 const PEAK_PARAMS = ["Peak", "Peak Hold"];
 const RMS_PARAMS = ["RMS"];
-const RESET_PARAMS = ["Reset"];
+const RESET_PARAMS = ["Measure", "Reset"];
+const TARGET_PARAMS = ["Target"];
+const STATE_PARAMS = ["State"];
 const SILENT_DB = -69.9;
 
 export function activate(activation: ActivationContext) {
@@ -52,7 +54,7 @@ function findMeter(context: Context) {
     const find = (names: string[]) => d.parameters.find((p) => names.includes(p.name)) ?? null;
     const peak = find(PEAK_PARAMS);
     if (peak && (METER_DEVICE.test(d.name) || find(RMS_PARAMS))) {
-      return { index, peak, rms: find(RMS_PARAMS), reset: find(RESET_PARAMS) };
+      return { index, peak, rms: find(RMS_PARAMS), reset: find(RESET_PARAMS), target: find(TARGET_PARAMS), state: find(STATE_PARAMS) };
     }
   }
   return null;
@@ -81,6 +83,9 @@ async function gainStage(context: Context) {
       peakDb: peak <= SILENT_DB ? null : peak,
       rmsDb: rms <= SILENT_DB ? null : rms,
       first: meterParams.index === 0,
+      targetDb: meterParams.target ? await meterParams.target.getValue() : null,
+      // Older meters have no State: treat a reading as held.
+      state: meterParams.state ? Math.round(await meterParams.state.getValue()) : peak <= SILENT_DB ? 0 : 3,
     };
   }
   console.log(`gain-stage: meter ${meter ? `peak ${meter.peakDb} dB, rms ${meter.rmsDb} dB, ${meter.first ? "first" : "not first"} on main` : "not found"}; ${tracks.length} top-level tracks, ${returns.length} returns`);
@@ -100,6 +105,7 @@ async function gainStage(context: Context) {
   );
   console.log(`gain-stage: moved ${reply.apply.length} faders by ${reply.offsetDb} dB`);
 
+  if (meterParams?.target && meter?.targetDb !== reply.targetDb) await meterParams.target.setValue(reply.targetDb);
   if (reply.resetMeter && meterParams?.reset) {
     await meterParams.reset.setValue(1);
     await meterParams.reset.setValue(0);

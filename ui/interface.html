@@ -16,43 +16,63 @@
         display: flex; flex-direction: column; gap: calc(var(--unit) * 3);
         padding: calc(var(--unit) * 4); user-select: none; -webkit-user-select: none;
       }
-      .inline { display: inline-flex; align-items: center; gap: calc(var(--unit) * 2); }
-      .value { min-width: 7ch; }
+      .inline { display: inline-flex; align-items: center; gap: calc(var(--unit) * 2); flex-wrap: wrap; }
       .hidden { display: none !important; }
+
+      /* numbered steps: an inverted number, a heading, then the step's content */
+      .step { display: grid; grid-template-columns: 26px 1fr; gap: var(--unit) calc(var(--unit) * 3); align-items: start; }
+      .step .n { background: var(--ink); color: var(--inverse); text-align: center; line-height: var(--line); }
+      .step.done .n { background: var(--unlit); color: var(--pad-text); }
+      .step .body { display: flex; flex-direction: column; gap: calc(var(--unit) * 2); min-width: 0; }
+      .step h2 { font: inherit; }
+      .step h2 .ui-hint { margin-left: calc(var(--unit) * 2); }
+      .reading { display: flex; gap: calc(var(--unit) * 5); align-items: baseline; flex-wrap: wrap; }
+      .reading b { font-weight: normal; }
+      .value { min-width: 7ch; }
       .result { display: flex; align-items: baseline; gap: calc(var(--unit) * 4); }
-      .result .ui-readout.zero { color: var(--label); }
-      #rows-wrap { flex: 1; min-height: 0; overflow-y: auto; border-top: 1px solid var(--ink); }
-      #rows-wrap .ui-table th { position: sticky; top: 0; background: var(--pad); border-bottom: 1px solid var(--ink); }
-      .kind { color: var(--label); }
-      .arrow { color: var(--label); }
+      .ui-readout.zero { color: var(--label); }
+
+      #rows-wrap { flex: 1; min-height: 60px; overflow-y: auto; }
+      #rows-wrap .ui-table th { position: sticky; top: 0; background: var(--pad); }
+      .kind, .arrow { color: var(--label); }
     </style>
   </head>
   <body>
     <header class="ui-header">
       <span class="ui-wordmark">gain stage</span>
-      <span class="ui-status" id="status"></span>
+      <span class="ui-hint">master peak to target, relative levels kept</span>
       <span class="spacer"></span>
       <span id="theme" title="dialog theme"></span>
     </header>
 
-    <div class="ui-notice hidden" id="notice"></div>
+    <section class="step" id="step-measure">
+      <span class="n">1</span>
+      <div class="body">
+        <h2>measure the master<span class="ui-hint" id="measure-hint"></span></h2>
+        <div class="ui-notice hidden" id="measure-notice"></div>
+        <div class="reading" id="reading"></div>
+        <span class="inline"><span class="ui-label">peak</span><input class="ui-input" id="peak" type="number" step="0.1" aria-label="master peak in dB" /><span>dB</span><span class="ui-hint" id="peak-source"></span></span>
+      </div>
+    </section>
 
-    <div class="ui-params">
-      <span class="label">peak</span>
-      <span class="inline"><input class="ui-input" id="peak" type="number" step="0.1" aria-label="master peak in dB" /><span>dB</span><span class="ui-hint" id="peak-source"></span></span>
-      <span class="label">target</span>
-      <span class="inline"><span id="target"><input aria-label="target master peak" /></span><span class="value" id="target-value"></span><span id="target-presets"></span></span>
+    <section class="step" id="step-target">
+      <span class="n">2</span>
+      <div class="body">
+        <h2>target peak<span class="ui-hint" id="target-hint"></span></h2>
+        <span class="inline"><span id="target"><input aria-label="target master peak" /></span><span class="value" id="target-value"></span><span id="target-presets"></span></span>
+      </div>
+    </section>
 
-      <span class="label" title="only if you use pre-fader sends: post-fader sends already follow the track faders">returns</span>
-      <span class="inline"><button id="returns" aria-label="move return faders too"></button><span class="ui-hint">only with pre-fader sends</span></span>
-      <span class="label" title="clear the meter's peak hold after applying, so you can check the result">reset</span>
-      <span><button id="reset" aria-label="reset the meter after applying"></button></span>
-    </div>
-
-    <div class="result">
-      <span class="ui-readout" id="offset"></span>
-      <span class="ui-hint" id="offset-hint"></span>
-    </div>
+    <section class="step" id="step-apply">
+      <span class="n">3</span>
+      <div class="body">
+        <h2>move the faders</h2>
+        <div class="result">
+          <span class="ui-readout" id="offset"></span>
+          <span class="ui-hint" id="offset-hint"></span>
+        </div>
+      </div>
+    </section>
 
     <div id="rows-wrap">
       <table class="ui-table">
@@ -62,7 +82,8 @@
     </div>
 
     <footer class="ui-footer">
-      <span class="ui-hint" id="footnote"></span>
+      <span class="inline" title="only needed with pre-fader sends: post-fader sends already follow the track faders"><span class="ui-label">returns too</span><button id="returns" aria-label="move return faders too"></button></span>
+      <span class="inline" title="after applying, the meter re-arms: play again to check you're on target"><span class="ui-label">re-measure after</span><button id="reset" aria-label="re-arm the meter after applying"></button></span>
       <span class="spacer"></span>
       <button class="ui-key" id="cancel"><kbd>esc</kbd>cancel</button>
       <button class="ui-key primary" id="apply"><kbd>ret</kbd><span>apply</span></button>

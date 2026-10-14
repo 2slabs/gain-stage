@@ -4,7 +4,7 @@
 /* --- header: wordmark-style title, status text, optional right side --- */
 .ui-header { display: flex; align-items: center; gap: calc(var(--unit) * 3); }
 .ui-header .spacer { flex: 1; }
-.ui-wordmark { background: var(--ink); color: var(--inverse); padding: 0 calc(var(--unit) * 2); }
+.ui-wordmark { background: var(--ink); color: var(--inverse); padding: 0 calc(var(--unit) * 2); white-space: nowrap; flex: none; }
 .ui-status { color: var(--label); display: flex; gap: calc(var(--unit) * 4); }
 .ui-status b { color: var(--ink); font-weight: normal; }
 .ui-hint { color: var(--label); }

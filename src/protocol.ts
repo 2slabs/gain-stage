@@ -6,6 +6,7 @@ export interface Settings {
   /** Master peak to aim for, dB. */
   targetDb: number;
   includeReturns: boolean;
+  /** Re-arm the meter after applying, so the next play-through confirms the result. */
   resetMeter: boolean;
   theme?: "dark" | "light";
 }
@@ -17,6 +18,10 @@ export interface MeterReading {
   rmsDb: number | null;
   /** Is it the first device on the main track (so it reads before any limiter)? */
   first: boolean;
+  /** The target set on the meter, dB. */
+  targetDb: number | null;
+  /** 0 idle, 1 armed (waiting for audio), 2 measuring, 3 held. */
+  state: number;
 }
 
 export interface Init {
@@ -32,6 +37,8 @@ export interface Result {
   /** Fader values to set, by channel id. */
   apply: { id: string; value: number }[];
   offsetDb: number;
+  /** Write back to the meter if it changed in the dialog. */
+  targetDb: number;
   resetMeter: boolean;
   settings: Settings;
 }
