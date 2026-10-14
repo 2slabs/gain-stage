@@ -27,5 +27,6 @@
     "vite": "^6.0.0"
   },
   "private": true,
-  "description": "Gain staging for Ableton Live: bring the mix to a target master peak while keeping relative levels."
+  "description": "Gain staging for Ableton Live: bring the mix to a target master peak while keeping relative levels.",
+  "license": "MIT"
 }
