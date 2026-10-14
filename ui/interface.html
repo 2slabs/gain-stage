@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>gain stage</title>
+    <script>
+      // Replaced by the extension with the faders, the meter reading and saved settings.
+      window.__INIT__ = null;
+    </script>
+    <!-- The 2sl-ui design system (synced into ./2sl by 2sl-ui/scripts/sync.sh; edit it there). -->
+    <link rel="stylesheet" href="./2sl/tokens.css" />
+    <link rel="stylesheet" href="./2sl/components.css" />
+    <style>
+      html, body { height: 100%; }
+      body {
+        display: flex; flex-direction: column; gap: calc(var(--unit) * 3);
+        padding: calc(var(--unit) * 4); user-select: none; -webkit-user-select: none;
+      }
+      .inline { display: inline-flex; align-items: center; gap: calc(var(--unit) * 2); }
+      .value { min-width: 7ch; }
+      .hidden { display: none !important; }
+      .result { display: flex; align-items: baseline; gap: calc(var(--unit) * 4); }
+      .result .ui-readout.zero { color: var(--label); }
+      #rows-wrap { flex: 1; min-height: 0; overflow-y: auto; border-top: 1px solid var(--ink); }
+      #rows-wrap .ui-table th { position: sticky; top: 0; background: var(--pad); border-bottom: 1px solid var(--ink); }
+      .kind { color: var(--label); }
+      .arrow { color: var(--label); }
+    </style>
+  </head>
+  <body>
+    <header class="ui-header">
+      <span class="ui-wordmark">gain stage</span>
+      <span class="ui-status" id="status"></span>
+      <span class="spacer"></span>
+      <span id="theme" title="dialog theme"></span>
+    </header>
+
+    <div class="ui-notice hidden" id="notice"></div>
+
+    <div class="ui-params">
+      <span class="label">peak</span>
+      <span class="inline"><input class="ui-input" id="peak" type="number" step="0.1" aria-label="master peak in dB" /><span>dB</span><span class="ui-hint" id="peak-source"></span></span>
+      <span class="label">target</span>
+      <span class="inline"><span id="target"><input aria-label="target master peak" /></span><span class="value" id="target-value"></span><span id="target-presets"></span></span>
+
+      <span class="label" title="only if you use pre-fader sends: post-fader sends already follow the track faders">returns</span>
+      <span class="inline"><button id="returns" aria-label="move return faders too"></button><span class="ui-hint">only with pre-fader sends</span></span>
+      <span class="label" title="clear the meter's peak hold after applying, so you can check the result">reset</span>
+      <span><button id="reset" aria-label="reset the meter after applying"></button></span>
+    </div>
+
+    <div class="result">
+      <span class="ui-readout" id="offset"></span>
+      <span class="ui-hint" id="offset-hint"></span>
+    </div>
+
+    <div id="rows-wrap">
+      <table class="ui-table">
+        <thead><tr><th>channel</th><th></th><th class="num">now</th><th></th><th class="num">after</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <footer class="ui-footer">
+      <span class="ui-hint" id="footnote"></span>
+      <span class="spacer"></span>
+      <button class="ui-key" id="cancel"><kbd>esc</kbd>cancel</button>
+      <button class="ui-key primary" id="apply"><kbd>ret</kbd><span>apply</span></button>
+    </footer>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>
