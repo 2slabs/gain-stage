@@ -13,6 +13,8 @@ export interface Settings {
 export interface MeterReading {
   /** Held sample peak in dB, or null if it hasn't heard anything since its last reset. */
   peakDb: number | null;
+  /** RMS over the same window, dB (null if not measured). */
+  rmsDb: number | null;
   /** Is it the first device on the main track (so it reads before any limiter)? */
   first: boolean;
 }

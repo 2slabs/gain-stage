@@ -59,10 +59,14 @@ function render() {
   let warning = "";
   if (!init.meter) warning = "no 2sl meter on the main track: add it first in the chain, play the loudest part, then reopen. or type the peak below.";
   else if (!init.meter.first) warning = "the 2sl meter isn't first on the main track, so it may read after your limiter. move it to the start of the chain.";
-  else if (init.meter.peakDb === null) warning = "the 2sl meter hasn't heard anything yet: play the loudest part of the track, then reopen.";
+  else if (init.meter.peakDb === null) warning = "the 2sl meter has no reading yet: press reset on it, play the loudest part until it says held, then reopen.";
   notice.textContent = warning;
   notice.className = warning ? "ui-notice warn" : "ui-notice hidden";
-  $("peak-source").textContent = init.meter?.peakDb != null && peakDb === init.meter.peakDb ? "from 2sl meter" : "typed";
+  const fromMeter = init.meter?.peakDb != null && peakDb === init.meter.peakDb;
+  const rms = init.meter?.rmsDb ?? null;
+  $("peak-source").textContent = fromMeter
+    ? rms !== null ? `meter · rms ${formatDb(rms, false)} · crest ${formatDb(init.meter!.peakDb! - rms, false)}` : "from 2sl meter"
+    : "typed";
 
   $("status").innerHTML = "<b></b><span></span>";
   $("status").querySelector("b")!.textContent = peakDb === null ? "peak unknown" : `master ${formatDb(peakDb)}`;
@@ -130,7 +134,7 @@ function apply() {
 function demoInit(): Init {
   const v = (db: number) => 0.85 + db / 40;
   return {
-    meter: { peakDb: 2.3, first: true },
+    meter: { peakDb: 2.3, rmsDb: -9.6, first: true },
     tracks: [
       { id: "1", name: "Kick", kind: "track", value: v(0) },
       { id: "2", name: "Bass", kind: "track", value: v(-3.5) },

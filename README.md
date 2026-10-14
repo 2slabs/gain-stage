@@ -7,8 +7,8 @@ A [2sl](https://2sl.to) project. Built on Ableton's Extensions SDK (public beta)
 ## Use it
 
 1. Put the **2sl meter** (Max for Live, in `~/m4l-dev/devices/2sl-meter/`) **first** on the main track, before any limiter, so it reads the mix going in.
-2. Press **reset** on the meter, then play the loudest part of the track. The meter holds the highest peak.
-3. Right-click any track → **Gain Stage Mix…**. The dialog shows the held peak, the target, the change (e.g. −8.3 dB) and every fader's before → after. **Apply** moves them in one undo step, and resets the meter so you can play it again and check.
+2. Press **reset** on the meter (it arms), then play the loudest part. It starts measuring when audio arrives, takes the max peak and the RMS over the **window** (5 s by default, 1–30), then says **held** and keeps both numbers until the next reset.
+3. Right-click any track → **Gain Stage Mix…**. The dialog shows the held peak (with the window's RMS and crest factor), the target, the change (e.g. −8.3 dB) and every fader's before → after. **Apply** moves them in one undo step, and resets the meter so you can play it again and check.
 
 No meter? Type the peak yourself (for example, with the limiter bypassed, read the master meter).
 

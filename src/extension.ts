@@ -21,6 +21,7 @@ type Context = ExtensionContext<V>;
 /** The 2sl meter (Max for Live) exposes these parameters. */
 const PEAK_PARAM = "Peak Hold";
 const RESET_PARAM = "Reset";
+const RMS_PARAM = "RMS";
 const SILENT_DB = -69.9;
 
 export function activate(activation: ActivationContext) {
@@ -45,7 +46,10 @@ function findMeter(context: Context) {
   const devices = context.application.song.mainTrack.devices;
   for (const [index, d] of devices.entries()) {
     const peak = d.parameters.find((p) => p.name === PEAK_PARAM);
-    if (peak) return { index, peak, reset: d.parameters.find((p) => p.name === RESET_PARAM) ?? null };
+    if (peak) {
+      const find = (name: string) => d.parameters.find((p) => p.name === name) ?? null;
+      return { index, peak, rms: find(RMS_PARAM), reset: find(RESET_PARAM) };
+    }
   }
   return null;
 }
@@ -68,9 +72,14 @@ async function gainStage(context: Context) {
   let meter: MeterReading | null = null;
   if (meterParams) {
     const peak = await meterParams.peak.getValue();
-    meter = { peakDb: peak <= SILENT_DB ? null : peak, first: meterParams.index === 0 };
+    const rms = meterParams.rms ? await meterParams.rms.getValue() : SILENT_DB - 1;
+    meter = {
+      peakDb: peak <= SILENT_DB ? null : peak,
+      rmsDb: rms <= SILENT_DB ? null : rms,
+      first: meterParams.index === 0,
+    };
   }
-  console.log(`gain-stage: meter ${meter ? `peak ${meter.peakDb} dB, ${meter.first ? "first" : "not first"} on main` : "not found"}; ${tracks.length} top-level tracks, ${returns.length} returns`);
+  console.log(`gain-stage: meter ${meter ? `peak ${meter.peakDb} dB, rms ${meter.rmsDb} dB, ${meter.first ? "first" : "not first"} on main` : "not found"}; ${tracks.length} top-level tracks, ${returns.length} returns`);
 
   const init: Init = { meter, tracks, returns, saved: loadSettings(context) };
   const json = JSON.stringify(init).replace(/</g, "\\u003c");
