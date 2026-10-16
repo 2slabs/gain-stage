@@ -16,7 +16,7 @@ No meter? Type the peak yourself (for example, with the limiter bypassed, read t
 
 ## How the dB maths works
 
-The SDK gives fader positions as 0–1 values, and Live's curve isn't published, so it was measured with Max for Live (`str_for_value` on a track's volume, every 0.0005). From −18 dB up it's exactly linear, dB = (value − 0.85) × 40. Below that, `src/fader.ts` uses the measured table, which matches Live's display within 0.006 dB everywhere.
+The SDK gives fader positions as 0–1 values, and Live's curve isn't published, so it was measured with Max for Live (`str_for_value` on a track's volume, every 0.0005; the device is [`tools/fader-calibrate/`](tools/fader-calibrate/), the data is [`references/live-fader-curve.tsv`](references/live-fader-curve.tsv)). From −18 dB up it's exactly linear, dB = (value − 0.85) × 40. Below that, `src/fader.ts` uses the measured table, which matches Live's display within 0.006 dB everywhere.
 
 ## Develop
 
@@ -36,6 +36,8 @@ npm run package   # → gain-stage-<version>.ablx
 | `src/extension.ts` | reads faders and the 2sl meter, applies the plan |
 | `ui/` | the dialog (2sl-ui) |
 | `meter/` | the 2sl meter: `.amxd` device, its `.js`, and the `.maxpat` source |
+| `tools/fader-calibrate/` | the Max for Live device that measured Live's fader curve |
+| `references/` | sources: the measured fader curve |
 
 Ableton and Live are trademarks of Ableton AG; this project isn't affiliated with or endorsed by Ableton.
 
